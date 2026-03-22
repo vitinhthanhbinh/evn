@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>EVN</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<link rel="manifest" href="manifest.json">
+
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-512.png">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="EVN">
+<meta name="theme-color" content="#0f2a5c">
+<style>
+
+body{
+font-family:Segoe UI;
+background:linear-gradient(135deg,#dfe9f3,#ffffff);
+margin:0;
+padding:10px;
+}
+
+h1{
+text-align:center;
+color:#ff3b3b;
+font-size:22px;
+margin-bottom:15px;
+}
+
+.box{
+max-width:700px;
+margin:auto;
+background:white;
+padding:15px;
+border-radius:12px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* ===== FIX LABEL KHÔNG XUỐNG DÒNG ===== */
+.title{
+text-align:left;
+font-weight:bold;
+white-space:nowrap;
+}
+
+/* MOBILE */
+@media(max-width:600px){
+table td, table th{
+font-size:13px;
+padding:6px;
+}
+input{
+font-size:14px;
+padding:6px;
+}
+.title{
+white-space:nowrap;
+font-size:13px;
+}
+}
+
+table{
+border-collapse:collapse;
+width:100%;
+margin-top:10px;
+}
+
+td,th{
+border:1px solid #ddd;
+padding:8px;
+text-align:right;
+}
+
+td{
+border:1px solid #ddd;
+padding:8px;
+text-align:right;
+}
+
+td input{
+  width:100%;
+  box-sizing:border-box;
+}
+
+th{
+background:#4CAF50;
+color:white;
+text-align:center
+}
+
+input{
+width:100%;              /* 🔥 chiếm hết ô */
+padding:6px 10px;
+border-radius:6px;
+border:1px solid #ccc;
+text-align:right;        /* 🔥 số nằm bên phải */
+font-size:15px;
+box-sizing:border-box;   /* 🔥 không bị tràn */
+}
+
+input::placeholder{
+text-align:left; /* placeholder bên trái, số bên phải */
+color:#aaa;
+}
+
+input:focus{
+border-color:#4CAF50;
+outline:none;
+}
+
+.red{color:#e60000;font-weight:bold;}
+.green{color:#009933;font-weight:bold;}
+.center{text-align:center;}
+
+/* RADIO BUTTON */
+.radio-box{
+display:flex;
+justify-content:center;
+gap:10px;
+margin-bottom:15px;
+flex-wrap:wrap;
+}
+
+.radio-box input{display:none;}
+
+.radio-box label{
+padding:8px 16px;
+border:2px solid #ccc;
+border-radius:20px;
+cursor:pointer;
+font-weight:bold;
+color:#555;
+transition:all 0.25s ease;
+}
+
+.radio-box label:hover{
+border-color:#4CAF50;
+color:#4CAF50;
+transform:translateY(-2px);
+box-shadow:0 4px 10px rgba(0,0,0,0.15);
+}
+
+.radio-box label:active{
+transform:scale(0.95);
+}
+
+.radio-box input:checked + label{
+background:#4CAF50;
+color:white;
+border-color:#4CAF50;
+box-shadow:0 3px 8px rgba(0,0,0,0.2);
+}
+
+/* ERROR */
+.error{
+border-color:red !important;
+}
+
+.msg{
+color:red;
+font-size:13px;
+text-align:center;
+margin-top:5px;
+}
+
+/* Tổng cộng */
+.tong{
+color:#007bff;
+font-weight:bold;
+}
+
+/* VAT */
+.vat{
+color:#ff9900;
+font-weight:bold;
+}
+
+.red{
+color:#ff2d2d;
+font-weight:bold;
+font-size:18px;
+}
+
+.pay-row td{
+background:#fff5f5;
+font-size:16px;
+font-weight:bold;
+}
+
+#dntt{
+  font-size:28px;
+  font-weight:700;
+  color:#00a651;
+  text-align:right;
+  background:#f0fff5;       /* nền nhẹ */
+  border-radius:8px;
+  padding:6px 10px;
+}
+
+/* khi thay đổi */
+#dntt.animate{
+  transform: scale(1.25);
+  color:#00c853;
+  text-shadow:0 0 10px rgba(0,200,83,0.7);
+}
+
+#dntt::after{
+  content:" kW";
+  font-size:13px;
+  color:#888;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h1>HÓA ĐƠN TIỀN ĐIỆN</h1>
+
+<div class="radio-box">
+  <input type="radio" id="r1" name="mode" checked>
+  <label for="r1">Tiền Điện</label>
+
+  <input type="radio" id="r2" name="mode">
+  <label for="r2">Điện Năng Tiêu Thụ</label>
+</div>
+
+<div class="msg" id="msg"></div>
+
+<table>
+<tr>
+<td class="title">Tiền Điện</td>
+<td><input id="money" placeholder="Nhập tiền"></td>
+
+<td class="title">Chỉ số cũ</td>
+<td><input id="oldIndex" placeholder="Nhập"></td>
+</tr>
+
+<tr>
+<td class="title green">ĐNTT</td>
+<td id="dntt" class="green">0</td>
+
+<td class="title">Chỉ số mới</td>
+<td><input id="newIndex" placeholder="Nhập"></td>
+</tr>
+</table>
+
+<table>
+
+<tr>
+<th>STT</th>
+<th>ĐNTT</th>
+<th>Đơn Giá</th>
+<th>Thành Tiền</th>
+</tr>
+
+<tr id="row1"><td class="center">1</td><td id="b1"></td><td>1,984</td><td id="t1"></td></tr>
+<tr id="row2"><td class="center">2</td><td id="b2"></td><td>2,050</td><td id="t2"></td></tr>
+<tr id="row3"><td class="center">3</td><td id="b3"></td><td>2,380</td><td id="t3"></td></tr>
+<tr id="row4"><td class="center">4</td><td id="b4"></td><td>2,998</td><td id="t4"></td></tr>
+<tr id="row5"><td class="center">5</td><td id="b5"></td><td>3,350</td><td id="t5"></td></tr>
+<tr id="row6"><td class="center">6</td><td id="b6"></td><td>3,460</td><td id="t6"></td></tr>
+
+<tr>
+<td colspan="3" class="title tong">Tổng cộng</td>
+<td id="tong" class="tong"></td>
+</tr>
+
+<tr>
+<td colspan="3" class="title vat">VAT 8%</td>
+<td id="vat" class="vat"></td>
+</tr>
+
+<tr class="pay-row">
+<td colspan="3" class="title red">Thanh toán</td>
+<td id="pay" class="red"></td>
+</tr>
+
+</table>
+
+</div>
+
+<script>
+// ===== FORMAT =====
+function formatVN(n){
+return Math.round(n).toLocaleString('vi-VN')
+}
+
+function formatInput(el){
+let v = el.value.replace(/[^\d]/g,'')
+el.value = v ? Number(v).toLocaleString('vi-VN') : ''
+}
+
+let bac=[50,50,100,100,100,999999]
+let gia=[1984,2050,2380,2998,3350,3460]
+
+let mode=1
+
+const moneyEl=document.getElementById("money")
+const oldEl=document.getElementById("oldIndex")
+const newEl=document.getElementById("newIndex")
+const msgEl=document.getElementById("msg")
+
+function showError(el,msg){
+msgEl.innerText=msg
+el.classList.add("error")
+}
+
+function clearError(){
+msgEl.innerText=""
+moneyEl.classList.remove("error")
+oldEl.classList.remove("error")
+newEl.classList.remove("error")
+}
+
+document.getElementById("r1").onclick=()=>setMode(1)
+document.getElementById("r2").onclick=()=>setMode(2)
+
+function setMode(m){
+mode=m
+clearAll()
+
+if(mode==1){
+moneyEl.disabled=false
+oldEl.disabled=true
+newEl.disabled=true
+}else{
+moneyEl.disabled=true
+oldEl.disabled=false
+newEl.disabled=false
+}
+}
+
+function clearAll(){
+
+clearError()
+
+moneyEl.value=""
+oldEl.value=""
+newEl.value=""
+
+document.getElementById("dntt").innerText=""
+document.getElementById("tong").innerText=""
+document.getElementById("vat").innerText=""
+document.getElementById("pay").innerText=""
+
+for(let i=1;i<=6;i++){
+document.getElementById("row"+i).style.display="none"
+}
+}
+
+function tinh(){
+
+clearError()
+
+let money=parseInt(moneyEl.value.replace(/\./g,''))||0
+let oldIndex=parseInt(oldEl.value.replace(/\./g,''))||0
+let newIndex=parseInt(newEl.value.replace(/\./g,''))||0
+
+let dntt=0
+
+if(mode==1){
+
+if(!money) return
+
+let kwh=0
+
+while(true){
+kwh++
+
+let temp=0, remain=kwh
+
+for(let i=0;i<6;i++){
+let used=Math.min(remain,bac[i])
+temp+=used*gia[i]
+remain-=used
+if(remain<=0) break
+}
+
+if(temp*1.08>=money) break
+}
+
+dntt=kwh
+}
+
+else{
+
+if(!oldIndex && !newIndex) return
+
+if(newIndex < oldIndex){
+showError(newEl,"Chỉ số mới phải ≥ chỉ số cũ")
+return
+}
+
+dntt=newIndex-oldIndex
+}
+
+const dnttEl = document.getElementById("dntt")
+
+dnttEl.innerText = formatVN(dntt)
+
+/* 🔥 animate */
+dnttEl.classList.add("animate")
+
+setTimeout(()=>{
+  dnttEl.classList.remove("animate")
+},300)
+
+let con=dntt, tong=0
+
+for(let i=0;i<6;i++){
+
+let used=Math.min(con,bac[i])
+if(used<=0){
+document.getElementById("row"+(i+1)).style.display="none"
+continue
+}
+
+let t=used*gia[i]
+
+document.getElementById("row"+(i+1)).style.display=""
+document.getElementById("b"+(i+1)).innerText=formatVN(used)
+document.getElementById("t"+(i+1)).innerText=formatVN(t)
+
+tong+=t
+con-=used
+}
+
+let vat=tong*0.08
+let pay=tong+vat
+
+document.getElementById("tong").innerText=formatVN(tong)
+document.getElementById("vat").innerText=formatVN(vat)
+document.getElementById("pay").innerText=formatVN(pay)
+
+}
+
+function handle(el){
+formatInput(el)
+setTimeout(tinh,0)
+}
+
+moneyEl.oninput=()=>handle(moneyEl)
+oldEl.oninput=()=>handle(oldEl)
+newEl.oninput=()=>handle(newEl)
+
+setMode(1)
+</script>
+
+</body>
+</html>
